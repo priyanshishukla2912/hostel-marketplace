@@ -4,6 +4,13 @@ from .forms import ListingForm
 from .models import Listing, ListingImage
 
 
+def home(request):
+    listings = []
+    if request.user.is_authenticated:
+        listings = Listing.objects.filter(is_sold=False).prefetch_related("images")
+    return render(request, "home.html", {"listings": listings})
+
+
 @login_required
 def create_listing(request):
     if request.method == "POST":

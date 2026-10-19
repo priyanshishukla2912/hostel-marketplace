@@ -1,7 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="text-center py-5">
-  <h1 class="fw-bold">Buy, sell and give away things in our hostel</h1>
-  <p class="text-muted">Listings are coming in the next phase.</p>
-</div>
+{% if user.is_authenticated %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Latest listings</h3>
+    <a class="btn btn-warning btn-sm" href="{% url 'create_listing' %}">Sell an item</a>
+  </div>
+  <div class="row g-3">
+    {% for listing in listings %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm">
+          {% with img=listing.images.all.0 %}
+            {% if img %}
+              <img src="{{ img.image.url }}" class="card-img-top bg-light" style="height: 180px; object-fit: contain;" alt="{{ listing.title }}">
+            {% else %}
+              <div class="bg-light d-flex align-items-center justify-content-center text-muted" style="height: 180px;">No photo</div>
+            {% endif %}
+          {% endwith %}
+          <div class="card-body">
+            <h6 class="card-title mb-1">
+              <a href="{% url 'listing_detail' listing.pk %}" class="stretched-link text-decoration-none text-dark">{{ listing.title }}</a>
+            </h6>
+            <div class="text-success fw-bold">Rs. {{ listing.price }}</div>
+            <small class="text-muted">{{ listing.get_category_display }} | {{ listing.get_condition_display }}</small>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-muted">No listings yet. Be the first to post something!</p>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-5">
+    <h1 class="fw-bold">Buy, sell and give away things in our hostel</h1>
+    <p class="text-muted">Log in or sign up with your hostel invite code to see what's for sale.</p>
+    <a class="btn btn-primary me-2" href="{% url 'login' %}">Log in</a>
+    <a class="btn btn-outline-primary" href="{% url 'signup' %}">Sign up</a>
+  </div>
+{% endif %}
 {% endblock %}
