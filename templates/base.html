@@ -14,6 +14,7 @@
       {% if user.is_authenticated %}
         <span class="text-white">Hi, {{ user.username }}</span>
         <a class="btn btn-outline-light btn-sm" href="{% url 'profile' %}">Profile</a>
+        <a class="btn btn-warning btn-sm" href="{% url 'create_listing' %}">Sell an item</a>
         <form method="post" action="{% url 'logout' %}" class="m-0">
           {% csrf_token %}
           <button class="btn btn-light btn-sm">Logout</button>

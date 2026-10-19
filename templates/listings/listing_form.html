@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Sell an item{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card shadow-sm"><div class="card-body p-4">
+      <h3 class="mb-3">Sell an item</h3>
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary w-100" type="submit">Post listing</button>
+      </form>
+    </div></div>
+  </div>
+</div>
+{% endblock %}
