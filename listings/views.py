@@ -1,4 +1,8 @@
+from decimal import Decimal, InvalidOperation
+
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from .forms import ListingForm, ListingEditForm
@@ -6,11 +10,52 @@ from .models import Listing, ListingImage
 
 
 def home(request):
-    listings = []
+    categories = Listing.CATEGORY_CHOICES
+    q = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "")
+    min_price = request.GET.get("min_price", "").strip()
+    max_price = request.GET.get("max_price", "").strip()
+    sort = request.GET.get("sort", "newest")
+
+    page_obj = None
     if request.user.is_authenticated:
         listings = Listing.objects.filter(is_sold=False).prefetch_related("images")
-    return render(request, "home.html", {"listings": listings})
 
+        if q:
+            listings = listings.filter(Q(title__icontains=q) | Q(description__icontains=q))
+        if category in dict(categories):
+            listings = listings.filter(category=category)
+        try:
+            if min_price:
+                listings = listings.filter(price__gte=Decimal(min_price))
+            if max_price:
+                listings = listings.filter(price__lte=Decimal(max_price))
+        except InvalidOperation:
+            pass
+
+        if sort == "price_low":
+            listings = listings.order_by("price")
+        elif sort == "price_high":
+            listings = listings.order_by("-price")
+        else:
+            listings = listings.order_by("-created_at")
+
+        page_obj = Paginator(listings, 8).get_page(request.GET.get("page"))
+
+    params = request.GET.copy()
+    params.pop("page", None)
+
+    return render(request, "home.html", {
+        "listings": page_obj if page_obj is not None else [],
+        "page_obj": page_obj,
+        "categories": categories,
+        "q": q,
+        "category": category,
+        "min_price": min_price,
+        "max_price": max_price,
+        "sort": sort,
+        "querystring": params.urlencode(),
+    })
 
 @login_required
 def create_listing(request):
