@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}My listings{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">My listings</h3>
+  <a class="btn btn-warning btn-sm" href="{% url 'create_listing' %}">Sell an item</a>
+</div>
+
+{% for listing in listings %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row align-items-center g-3">
+        <div class="col-4 col-md-2">
+          {% with img=listing.images.all.0 %}
+            {% if img %}
+              <img src="{{ img.image.url }}" class="w-100 rounded bg-light border" style="height: 90px; object-fit: contain;" alt="{{ listing.title }}">
+            {% else %}
+              <div class="bg-light border rounded d-flex align-items-center justify-content-center text-muted" style="height: 90px;">No photo</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+        <div class="col-8 col-md-5">
+          <h6 class="mb-1">
+            <a href="{% url 'listing_detail' listing.pk %}" class="text-decoration-none text-dark">{{ listing.title }}</a>
+            {% if listing.is_sold %}<span class="badge bg-secondary">Sold</span>{% endif %}
+          </h6>
+          <div class="text-success fw-bold">Rs. {{ listing.price }}</div>
+          <small class="text-muted">{{ listing.get_category_display }} | {{ listing.get_condition_display }}</small>
+        </div>
+        <div class="col-12 col-md-5 d-flex flex-wrap gap-2 justify-content-md-end">
+          <a class="btn btn-outline-primary btn-sm" href="{% url 'edit_listing' listing.pk %}">Edit</a>
+
+          <form method="post" action="{% url 'toggle_sold' listing.pk %}" class="m-0">
+            {% csrf_token %}
+            <button class="btn btn-outline-secondary btn-sm" type="submit">
+              {% if listing.is_sold %}Relist{% else %}Mark as sold{% endif %}
+            </button>
+          </form>
+
+          <form method="post" action="{% url 'delete_listing' listing.pk %}" class="m-0"
+                onsubmit="return confirm('Delete this listing permanently?');">
+            {% csrf_token %}
+            <button class="btn btn-outline-danger btn-sm" type="submit">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <p class="text-muted">You haven't posted anything yet.</p>
+{% endfor %}
+{% endblock %}

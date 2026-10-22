@@ -23,5 +23,9 @@
     Seller: {{ listing.seller.profile.full_name|default:listing.seller.username }}
     {% if listing.seller.profile.room_no %}(Room {{ listing.seller.profile.room_no }}){% endif %}
   </p>
+  {% if listing.seller == request.user %}
+  <a class="btn btn-outline-primary btn-sm" href="{% url 'edit_listing' listing.pk %}">Edit this listing</a>
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'my_listings' %}">My listings</a>
+  {% endif %}
 </div></div>
 {% endblock %}

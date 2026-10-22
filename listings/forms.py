@@ -35,3 +35,19 @@ class ListingForm(forms.ModelForm):
             if f.size > 5 * 1024 * 1024:
                 raise forms.ValidationError("Each photo must be smaller than 5 MB.")
         return files
+
+
+class ListingEditForm(ListingForm):
+    images = MultipleImageField(required=False, label="Add more photos (optional)")
+
+    def clean_images(self):
+        files = self.cleaned_data.get("images") or []
+        existing = self.instance.images.count()
+        if existing + len(files) > 4:
+            raise forms.ValidationError(
+                f"A listing can have at most 4 photos. You already have {existing}."
+            )
+        for f in files:
+            if f.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Each photo must be smaller than 5 MB.")
+        return files
